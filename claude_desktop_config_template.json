@@ -1,0 +1,41 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/stevecain/Desktop",
+        "/Users/stevecain/Repos"
+      ]
+    },
+    "weather": {
+      "command": "/Library/Frameworks/Python.framework/Versions/3.13/bin/uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp[cli]",
+        "mcp",
+        "run",
+        "/Users/stevecain/Repos/weather/weather.py"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "youtube": {
+      "command": "/Library/Frameworks/Python.framework/Versions/3.13/bin/uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp[cli]",
+        "mcp",
+        "run",
+        "/Users/stevecain/Repos/youtube/youtube_api.py"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  }
+}
