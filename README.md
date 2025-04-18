@@ -1,5 +1,9 @@
 # YouTube Data API MCP Server
 
+## LLM links for building this:
+https://chatgpt.com/c/6801d2b2-7a84-8007-94e1-1139c132a160
+
+
 This project provides an MCP (Managed Cloud Project) server for accessing the YouTube Data API v3. The server exposes YouTube functionality through a standardized MCP interface.
 
 ## Getting the discovery JSON:
@@ -12,8 +16,6 @@ uv pip install python-dotenv
 
 ## Debugging:
 mcp dev youtube_api.py 
-
-
 
 ## Setup - Note TBC - use pipx, seems to play nicely with uv
 source .venv/bin/activate ## activates the environment that is stored in the local .venv folder
@@ -161,4 +163,4 @@ This server can be extended with additional tools and resources by following the
 
 ## License
 
-MIT
+N/A (Private)
