@@ -596,101 +596,178 @@ async def get_video_recommendations(video_id: str = None) -> Dict[str, Any]:
     
     return {"result": "\n".join(results)}
 
-def log_mcp_version_info():
-    """Log MCP version information for debugging."""
+@mcp.tool()
+async def analyze_video_performance(video_id: str, time_period: int = 7, unit: str = "days") -> Dict[str, Any]:
+    """Analyze performance metrics for a YouTube video over time.
+    
+    This function retrieves current metrics for a video and compares them with
+    historical data to track growth and engagement trends.
+    
+    Args:
+        video_id: The ID of the YouTube video to analyze
+        time_period: Number of time units to analyze (default: 7)
+        unit: Time unit for analysis - "days" or "hours" (default: "days")
+    """
+    # Validate input parameters
+    if time_period <= 0:
+        return {"error": "Time period must be a positive integer."}
+        
+    if unit not in ["days", "hours"]:
+        return {"error": "Unit must be either 'days' or 'hours'."}
+    
+    # Get current video statistics
+    params = {
+        "part": "snippet,statistics,contentDetails",
+        "id": video_id
+    }
+    
+    current_data = await make_youtube_request("videos", params)
+    
+    if "error" in current_data:
+        return {"error": current_data["error"]}
+    
+    if "items" not in current_data or not current_data["items"]:
+        return {"error": "Video not found or error fetching video information."}
+    
+    # Extract current metrics
+    video = current_data["items"][0]
+    snippet = video.get("snippet", {})
+    statistics = video.get("statistics", {})
+    
+    title = snippet.get("title", "Unknown")
+    channel = snippet.get("channelTitle", "Unknown")
+    published_at = snippet.get("publishedAt", "Unknown")
+    
+    # Current metrics
+    current_views = int(statistics.get("viewCount", 0))
+    current_likes = int(statistics.get("likeCount", 0))
+    current_comments = int(statistics.get("commentCount", 0))
+    
+    # Simulate historical data (in a real implementation, this would come from a database)
+    # For demonstration purposes, we'll generate synthetic historical data
+    # In a production environment, you would store and retrieve actual historical data
+    
+    import random
+    from datetime import datetime, timedelta
+    
+    # Parse published date and ensure timezone consistency
     try:
-        import mcp
-        print(f"MCP SDK version: {getattr(mcp, '__version__', 'unknown')}", file=sys.stderr)
-        if hasattr(mcp, '__file__'):
-            print(f"MCP location: {mcp.__file__}", file=sys.stderr)
+        # Convert to timezone-naive datetime by stripping timezone info
+        publish_date = datetime.fromisoformat(published_at.replace('Z', ''))
+    except (ValueError, TypeError):
+        publish_date = datetime.now() - timedelta(days=30)  # Fallback
+    
+    # Generate historical data points (simulated)
+    historical_data = []
+    today = datetime.now()  # This is timezone-naive
+    
+    # Determine how many data points we can generate based on video age
+    if unit == "days":
+        video_age_units = (today - publish_date).days
+        time_unit_str = "days"
+        format_str = "%Y-%m-%d"
+    else:  # hours
+        video_age_units = int((today - publish_date).total_seconds() / 3600)  # Convert to hours
+        time_unit_str = "hours"
+        format_str = "%Y-%m-%d %H:%M"
+    
+    data_points = min(time_period, video_age_units)
+    
+    if data_points <= 0:
+        # Video is too new, just return current stats
+        return {
+            "result": f"Video '{title}' by {channel} is too new for historical analysis.\n\n"
+                     f"Current Statistics:\n"
+                     f"Views: {current_views:,}\n"
+                     f"Likes: {current_likes:,}\n"
+                     f"Comments: {current_comments:,}\n"
+        }
+    
+    # Calculate approximate growth rates (for simulation)
+    # In reality, these would come from stored historical data
+    if unit == "days":
+        unit_view_rate = current_views / max(video_age_units, 1)
+        unit_like_rate = current_likes / max(video_age_units, 1)
+        unit_comment_rate = current_comments / max(video_age_units, 1)
+    else:  # hours
+        # Hourly rates are typically lower than daily rates
+        unit_view_rate = (current_views / max(video_age_units, 1)) * 0.8  # Adjust for hourly pattern
+        unit_like_rate = (current_likes / max(video_age_units, 1)) * 0.8
+        unit_comment_rate = (current_comments / max(video_age_units, 1)) * 0.8
+    
+    # Generate simulated historical data points with some randomness
+    for i in range(data_points):
+        units_ago = data_points - i
         
-        # Check if we're running under uv
-        is_uv = 'UV_SUBPROCESS' in os.environ or os.environ.get('VIRTUAL_ENV', '').endswith('/.uv')
-        print(f"Running under UV: {is_uv}", file=sys.stderr)
-    except Exception as e:
-        print(f"Error getting MCP version info: {str(e)}", file=sys.stderr)
-
-if __name__ == "__main__":
-    # Initialize and run the server
-    print("Starting YouTube MCP server with stdio transport...", file=sys.stderr)
-    try:
-        print("Environment variables:", file=sys.stderr)
-        for key, value in os.environ.items():
-            if key.startswith("PYTHON") or key == "PATH" or "UV" in key or key == "YOUTUBE_API_KEY":
-                # Don't print the actual API key value for security reasons
-                if key == "YOUTUBE_API_KEY":
-                    print(f"  {key}=***Set***", file=sys.stderr)
-                else:
-                    print(f"  {key}={value}", file=sys.stderr)
+        if unit == "days":
+            date = today - timedelta(days=units_ago)
+        else:  # hours
+            date = today - timedelta(hours=units_ago)
         
-        print("Python version:", sys.version, file=sys.stderr)
-        print("Python executable:", sys.executable, file=sys.stderr)
-        print("Working directory:", os.getcwd(), file=sys.stderr)
+        # Add some randomness to make the data more realistic
+        # Hourly data typically has more variance than daily data
+        if unit == "days":
+            randomness = lambda: random.uniform(0.85, 1.15)
+        else:  # hours
+            randomness = lambda: random.uniform(0.75, 1.25)  # More variance for hourly data
         
-        # Log MCP version info
-        log_mcp_version_info()
+        # Calculate estimated metrics for this date
+        est_views = int(max(0, current_views - (unit_view_rate * units_ago * randomness())))
+        est_likes = int(max(0, current_likes - (unit_like_rate * units_ago * randomness())))
+        est_comments = int(max(0, current_comments - (unit_comment_rate * units_ago * randomness())))
         
-        # Add a small delay to ensure everything is initialized
-        time.sleep(0.5)
-        
-        # Add debug wrapper for MCP tools and resources
-        print("DEBUG: Adding debug wrapper for MCP tools and resources", file=sys.stderr)
-        original_tool = mcp.tool
-        original_resource = mcp.resource
-        
-        def debug_tool_wrapper(*args, **kwargs):
-            original_decorator = original_tool(*args, **kwargs)
-            def wrapper(func):
-                @original_decorator
-                async def wrapped_func(*func_args, **func_kwargs):
-                    print(f"DEBUG: Calling tool {func.__name__} with args {func_args} and kwargs {func_kwargs}", file=sys.stderr)
-                    try:
-                        result = await func(*func_args, **func_kwargs)
-                        print(f"DEBUG: Tool {func.__name__} returned: {type(result)}", file=sys.stderr)
-                        if not isinstance(result, dict):
-                            print(f"WARNING: Tool {func.__name__} returned non-dict: {result}", file=sys.stderr)
-                            result = {"result": str(result)}
-                        return result
-                    except Exception as e:
-                        print(f"DEBUG: Tool {func.__name__} raised exception: {str(e)}", file=sys.stderr)
-                        import traceback
-                        traceback.print_exc(file=sys.stderr)
-                        return {"error": f"Exception in {func.__name__}: {str(e)}"}
-                return wrapped_func
-            return wrapper
-        
-        def debug_resource_wrapper(*args, **kwargs):
-            original_decorator = original_resource(*args, **kwargs)
-            def wrapper(func):
-                @original_decorator
-                async def wrapped_func(*func_args, **func_kwargs):
-                    print(f"DEBUG: Calling resource {func.__name__} with args {func_args} and kwargs {func_kwargs}", file=sys.stderr)
-                    try:
-                        result = await func(*func_args, **func_kwargs) if callable(getattr(func, '__await__', None)) else func(*func_args, **func_kwargs)
-                        print(f"DEBUG: Resource {func.__name__} returned: {type(result)}", file=sys.stderr)
-                        if not isinstance(result, dict):
-                            print(f"WARNING: Resource {func.__name__} returned non-dict: {result}", file=sys.stderr)
-                            result = {"result": str(result)}
-                        return result
-                    except Exception as e:
-                        print(f"DEBUG: Resource {func.__name__} raised exception: {str(e)}", file=sys.stderr)
-                        import traceback
-                        traceback.print_exc(file=sys.stderr)
-                        return {"error": f"Exception in {func.__name__}: {str(e)}"}
-                return wrapped_func if callable(getattr(func, '__await__', None)) else wrapped_func()
-            return wrapper
-        
-        # Replace MCP decorators with debug versions
-        mcp.tool = debug_tool_wrapper
-        mcp.resource = debug_resource_wrapper
-        
-        # Explicitly set stdio transport
-        print("Attempting to start MCP run with stdio transport...", file=sys.stderr)
-        mcp.run(transport='stdio')
-    except Exception as e:
-        print(f"Error running MCP server: {str(e)}", file=sys.stderr)
-        print(f"Error type: {type(e)}", file=sys.stderr)
-        if hasattr(e, "__traceback__"):
-            import traceback
-            traceback.print_tb(e.__traceback__, file=sys.stderr)
-        sys.exit(1)
+        historical_data.append({
+            "date": date.strftime(format_str),
+            "views": est_views,
+            "likes": est_likes,
+            "comments": est_comments
+        })
+    
+    # Add current data point
+    historical_data.append({
+        "date": today.strftime(format_str),
+        "views": current_views,
+        "likes": current_likes,
+        "comments": current_comments
+    })
+    
+    # Calculate growth metrics
+    first_data = historical_data[0]
+    last_data = historical_data[-1]
+    
+    view_growth = last_data["views"] - first_data["views"]
+    like_growth = last_data["likes"] - first_data["likes"]
+    comment_growth = last_data["comments"] - first_data["comments"]
+    
+    view_growth_percent = (view_growth / max(first_data["views"], 1)) * 100
+    like_growth_percent = (like_growth / max(first_data["likes"], 1)) * 100
+    comment_growth_percent = (comment_growth / max(first_data["comments"], 1)) * 100
+    
+    # Calculate engagement rate (likes + comments per view)
+    engagement_rate = ((current_likes + current_comments) / max(current_views, 1)) * 100
+    
+    # Format the results
+    result = f"Performance Analysis for '{title}' by {channel}\n\n"
+    
+    # Current statistics
+    result += "Current Statistics:\n"
+    result += f"Views: {current_views:,}\n"
+    result += f"Likes: {current_likes:,}\n"
+    result += f"Comments: {current_comments:,}\n"
+    result += f"Engagement Rate: {engagement_rate:.2f}%\n\n"
+    
+    # Growth over time period
+    result += f"Growth over the past {data_points} {time_unit_str}:\n"
+    result += f"Views: +{view_growth:,} ({view_growth_percent:.2f}%)\n"
+    result += f"Likes: +{like_growth:,} ({like_growth_percent:.2f}%)\n"
+    result += f"Comments: +{comment_growth:,} ({comment_growth_percent:.2f}%)\n\n"
+    
+    # Breakdown by time unit
+    result += f"{time_unit_str.capitalize()} Breakdown:\n"
+    for data in historical_data:
+        result += f"{data['date']}: {data['views']:,} views, {data['likes']:,} likes, {data['comments']:,} comments\n"
+    
+    # Note about simulated data
+    result += "\nNote: Historical data is simulated for demonstration purposes. In a production environment, actual historical data would be used."
+    
+    return {"result": result}
