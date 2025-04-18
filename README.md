@@ -2,12 +2,18 @@
 
 This project provides an MCP (Managed Cloud Project) server for accessing the YouTube Data API v3. The server exposes YouTube functionality through a standardized MCP interface.
 
+## Getting the discovery JSON:
+curl https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest \ -o youtube-v3-discovery.json
+
+
 ## pip installation while using uv (note single ticks for certain packages):
 uv pip install 'mcp[cli]'  
 uv pip install python-dotenv
 
 ## Debugging:
 mcp dev youtube_api.py 
+
+
 
 ## Setup - Note TBC - use pipx, seems to play nicely with uv
 source .venv/bin/activate ## activates the environment that is stored in the local .venv folder
@@ -20,6 +26,9 @@ uv run python youtube_api.py
 - Python 3.9+
 - A Google Cloud project with the YouTube Data API v3 enabled
 - A YouTube API key
+
+## Gap analysis of implementation vs discovery file
+uv python gap_analysis.py
 
 ### Installation
 
