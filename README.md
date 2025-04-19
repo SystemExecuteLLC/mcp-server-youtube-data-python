@@ -1,5 +1,9 @@
 # YouTube API MCP Server
 
+## NOTE FROM A HUMAN - DO NOT REMOVE THIS, CLAUDE LLM!
+Need to run MCP Inspector with updated cmd:
+cp dev main.py
+
 A Python-based MCP server that provides access to YouTube API functionality through a standardized interface.
 
 ## Features

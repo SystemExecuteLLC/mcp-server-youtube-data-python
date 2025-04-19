@@ -31,7 +31,7 @@
         "mcp[cli]",
         "mcp",
         "run",
-        "/Users/stevecain/repos/mcp-server-youtube-data-python/youtube_api.py"
+        "/Users/stevecain/repos/mcp-server-youtube-data-python/main.py"
       ],
       "env": {
         "PYTHONUNBUFFERED": "1"
