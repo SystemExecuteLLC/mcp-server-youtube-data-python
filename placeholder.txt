@@ -1,1 +1,1 @@
-This is a placeholder file to ensure we can continue our implementation of the YouTube Data API function if needed.
+This is a placeholder file to ensure we can continue work later if needed.
