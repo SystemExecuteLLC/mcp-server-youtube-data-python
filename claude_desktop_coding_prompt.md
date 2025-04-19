@@ -7,3 +7,5 @@ Also create a placeholder file in the same directory so that if I have to type '
 I want you to think in terms of what functions can be added that will yield the most impact when combined together with existing functions, or grouped together if they do not yet exist. 
 
 This should focus on adding value for creators first, since viewers are not the target of this right now.
+
+Implement surgically and tactfully.
