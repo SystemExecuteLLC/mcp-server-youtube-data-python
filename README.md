@@ -1,41 +1,23 @@
-# YouTube Data API MCP Server
+# YouTube API MCP Server
 
-## LLM links for building this:
-https://chatgpt.com/c/6801d2b2-7a84-8007-94e1-1139c132a160
+A Python-based MCP server that provides access to YouTube API functionality through a standardized interface.
 
+## Features
 
-This project provides an MCP (Managed Cloud Project) server for accessing the YouTube Data API v3. The server exposes YouTube functionality through a standardized MCP interface.
+- Channel information retrieval
+- Video search and details
+- Thumbnail effectiveness analysis
+- Playlist management
+- Comment retrieval
+- Live chat interaction
+- Caption/subtitle analysis
+- Live broadcast creation
+- Performance analytics
+- And more!
 
-## Getting the discovery JSON:
-curl https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest \ -o youtube-v3-discovery.json
+## Installation
 
-
-## pip installation while using uv (note single ticks for certain packages):
-uv pip install 'mcp[cli]'  
-uv pip install python-dotenv
-
-## Debugging:
-mcp dev youtube_api.py 
-
-## Setup - Note TBC - use pipx, seems to play nicely with uv
-source .venv/bin/activate ## activates the environment that is stored in the local .venv folder
-
-uv pip install -r requirements.txt
-uv run python youtube_api.py
-
-### Prerequisites
-
-- Python 3.9+
-- A Google Cloud project with the YouTube Data API v3 enabled
-- A YouTube API key
-- (For creator analytics): OAuth 2.0 credentials
-
-## Gap analysis of implementation vs discovery file
-uv python gap_analysis.py
-
-### Installation
-
-1. Clone this repository:
+1. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/mcp-server-youtube-data-python.git
    cd mcp-server-youtube-data-python
@@ -46,334 +28,149 @@ uv python gap_analysis.py
    pip install -r requirements.txt
    ```
 
-3. Set your YouTube API key as an environment variable:
+3. Set up environment variables:
    ```bash
-   export YOUTUBE_API_KEY="your-api-key-here"
+   cp .env.example .env
+   ```
+   
+   Then edit the `.env` file to add your YouTube API key:
+   ```
+   YOUTUBE_API_KEY=your_api_key_here
    ```
 
-   For Windows Command Prompt:
-   ```cmd
-   set YOUTUBE_API_KEY=your-api-key-here
+   For functions requiring OAuth (like sending chat messages, creating broadcasts, etc.):
+   ```
+   YOUTUBE_CLIENT_ID=your_client_id
+   YOUTUBE_CLIENT_SECRET=your_client_secret
+   YOUTUBE_OAUTH_TOKEN=your_oauth_token
    ```
 
-   For Windows PowerShell:
-   ```powershell
-   $env:YOUTUBE_API_KEY="your-api-key-here"
-   ```
+## Usage
 
-4. For creator analytics features, set OAuth credentials:
-   ```bash
-   export YOUTUBE_CLIENT_ID="your-client-id"
-   export YOUTUBE_CLIENT_SECRET="your-client-secret"
-   export YOUTUBE_OAUTH_TOKEN="your-oauth-token"
-   ```
-
-## Running the Server
-
-Start the MCP server:
+Start the server:
 
 ```bash
-python youtube_api.py
+python main.py
 ```
+
+The server will start and register all tools and resources.
 
 ## Available Tools
 
-### Basic Channel and Video Tools
-
-### `get_channel_info`
-
-Gets information about a YouTube channel.
-
-Parameters:
-- `channel_id`: The ID of the YouTube channel
-
-Example:
-```
-get_channel_info(channel_id="UCXuqSBlHAE6Xw-yeJA0Tunw")
-```
-
-### `search_videos`
-
-Searches for YouTube videos based on a query.
-
-Parameters:
-- `query`: Search query string
-- `max_results`: Maximum number of results to return (default: 10, max: 50)
-
-Example:
-```
-search_videos(query="machine learning tutorial", max_results=5)
-```
-
-### `get_video_details`
-
-Gets detailed information about a YouTube video.
-
-Parameters:
-- `video_id`: The ID of the YouTube video
-
-Example:
-```
-get_video_details(video_id="dQw4w9WgXcQ")
-```
-
-### `list_channel_videos`
-
-Lists videos from a specific YouTube channel.
-
-Parameters:
-- `channel_id`: The ID of the YouTube channel
-- `max_results`: Maximum number of results to return (default: 10, max: 50)
-
-Example:
-```
-list_channel_videos(channel_id="UCXuqSBlHAE6Xw-yeJA0Tunw", max_results=5)
-```
-
-### `get_playlist_details`
-
-Gets details about a YouTube playlist and its videos.
-
-Parameters:
-- `playlist_id`: The ID of the YouTube playlist
-- `max_results`: Maximum number of videos to return (default: 10, max: 50)
-
-Example:
-```
-get_playlist_details(playlist_id="PL59LTecnGM1NRUyune3SxzZlYpZezK-oQ")
-```
-
-### `get_video_comments`
-
-Gets comments for a YouTube video.
-
-Parameters:
-- `video_id`: The ID of the YouTube video
-- `max_results`: Maximum number of comments to return (default: 10, max: 100)
-
-Example:
-```
-get_video_comments(video_id="dQw4w9WgXcQ", max_results=20)
-```
-
-### `search_by_topic`
-
-Searches for YouTube videos related to a specific Freebase topic.
-
-Parameters:
-- `topic_id`: The Freebase topic ID
-- `max_results`: Maximum number of results to return (default: 10, max: 50)
-
-Example:
-```
-search_by_topic(topic_id="/m/0d6lp", max_results=5)
-```
-
-### Creator Analytics Tools (Requires OAuth)
-
-### `get_channel_analytics`
-
-Gets advanced performance analytics for a YouTube channel.
-
-Parameters:
-- `channel_id`: The ID of the YouTube channel to analyze
-- `metrics`: List of metrics to retrieve (default: views, likes, subscribers)
-- `dimensions`: List of dimensions to group by (default: day)
-- `start_date`: Start date in ISO format YYYY-MM-DD (default: 30 days ago)
-- `end_date`: End date in ISO format YYYY-MM-DD (default: today)
-- `sort_by`: Metric to sort by (default: date ascending)
-
-Example:
-```
-get_channel_analytics(channel_id="your-channel-id", metrics=["views", "subscribersGained"], start_date="2023-01-01")
-```
-
-### `get_audience_demographics`
-
-Gets detailed audience demographics for a YouTube channel.
-
-Parameters:
-- `channel_id`: The ID of the YouTube channel to analyze
-
-Example:
-```
-get_audience_demographics(channel_id="your-channel-id")
-```
-
-### `analyze_video_performance`
-
-Analyzes performance metrics for a specific video over time.
-
-Parameters:
-- `video_id`: The ID of the YouTube video to analyze
-- `time_period`: Number of time units to analyze (default: 7)
-- `unit`: Time unit for analysis - "days" or "hours" (default: "days")
-
-Example:
-```
-analyze_video_performance(video_id="your-video-id", time_period=14)
-```
-
-### `get_channel_subscriptions`
-
-Gets a list of channels that the specified channel is subscribed to.
-Note: This requires OAuth authorization and only works with the authenticated user's channel.
-
-Parameters:
-- `channel_id`: The ID of the YouTube channel (must be authorized user's channel)
-- `max_results`: Maximum number of results to return (default: 10, max: 50)
-
-Example:
-```
-get_channel_subscriptions(channel_id="your-authorized-channel-id")
-```
-
-### Livestream and Video Management Tools (Requires OAuth)
-
-### `create_live_broadcast`
-
-Creates and schedules a YouTube live broadcast.
-
-Parameters:
-- `title`: Title of the live broadcast
-- `description`: Description of the live broadcast
-- `scheduled_start_time`: ISO 8601 timestamp for the scheduled start
-- `privacy_status`: Privacy status - 'private', 'public', or 'unlisted' (default: 'private')
-- `enable_dvr`: Whether viewers can rewind the stream (default: True)
-- `enable_auto_start`: Whether the broadcast should automatically start (default: True)
-- `enable_auto_stop`: Whether the broadcast should automatically end (default: True)
-
-Example:
-```
-create_live_broadcast(title="My Live Stream", description="A test live stream", scheduled_start_time="2023-12-31T18:00:00Z")
-```
-
-### `get_active_live_chat_id`
-
-Gets the active live chat ID for a YouTube livestream.
-
-Parameters:
-- `video_id`: The ID of the YouTube livestream video
-
-Example:
-```
-get_active_live_chat_id(video_id="your-livestream-id")
-```
-
-### `get_live_chat_messages`
-
-Gets live chat messages from a YouTube livestream.
-
-Parameters:
-- `live_chat_id`: The ID of the live chat to retrieve messages from
-- `max_results`: Maximum number of messages to return (default: 20, max: 200)
-
-Example:
-```
-get_live_chat_messages(live_chat_id="your-live-chat-id", max_results=50)
-```
-
-### `send_live_chat_message`
-
-Sends a message to a YouTube livestream chat.
-
-Parameters:
-- `live_chat_id`: The ID of the live chat to send a message to
-- `message_text`: The text content of the message to send
-
-Example:
-```
-send_live_chat_message(live_chat_id="your-live-chat-id", message_text="Hello from the API!")
-```
-
-### `upload_video`
-
-Uploads a video to YouTube with complete metadata.
-
-Parameters:
-- `file_path`: Local path to the video file
-- `title`: Title of the video
-- `description`: Description of the video
-- `privacy_status`: Privacy status - 'private', 'public', or 'unlisted' (default: 'private')
-- `tags`: List of tags/keywords for the video (default: None)
-- `category_id`: YouTube category ID (default: '22' for People & Blogs)
-- `notify_subscribers`: Whether to notify subscribers (default: True)
-- `language`: ISO 639-1 language code (default: 'en')
-- `location_latitude`: Latitude for video geo-tagging (default: None)
-- `location_longitude`: Longitude for video geo-tagging (default: None)
-- `made_for_kids`: Whether this content is made for children (default: False)
-
-Example:
-```
-upload_video(file_path="/path/to/video.mp4", title="My Video", description="A test video upload")
-```
-
-### Caption and Transcript Tools (Requires OAuth)
-
-### `get_captions`
-
-Gets captions/subtitles for a YouTube video.
-
-Parameters:
-- `video_id`: The ID of the YouTube video
-- `language_code`: ISO 639-1 language code (e.g., 'en', 'es', 'fr') (default: None returns list of available captions)
-- `format_type`: Format to return captions in - 'text', 'srt', or 'vtt' (default: 'text')
-
-Example:
-```
-get_captions(video_id="your-video-id", language_code="en")
-```
-
-### `analyze_captions`
-
-Analyzes captions/subtitles for a YouTube video.
-
-Parameters:
-- `video_id`: The ID of the YouTube video
-- `language_code`: ISO 639-1 language code (default: "en")
-- `analysis_type`: Type of analysis - 'keywords', 'timeline', or 'phrases' (default: 'keywords')
-
-Example:
-```
-analyze_captions(video_id="your-video-id", analysis_type="phrases")
-```
+- `get_channel_info`: Get information about a YouTube channel (accepts channel ID or handle)
+- `search_videos`: Search for YouTube videos with a query
+- `get_video_details`: Get detailed information about a video
+- `list_channel_videos`: List videos from a specific channel (accepts channel ID or handle)
+- `lookup_channel`: Look up a YouTube channel ID from a handle
+- `get_playlist_details`: Get details about a playlist and its videos
+- `get_video_comments`: Get comments for a video
+- `analyze_thumbnail_effectiveness`: Compare a video's thumbnail against similar successful videos
+- `search_by_topic`: Search for videos related to a specific Freebase topic
+- `analyze_video_performance`: Analyze performance metrics for a video over time
+- `create_live_broadcast`: Schedule a YouTube livestream
+- `get_captions`: Get captions/subtitles for a video
+- `analyze_captions`: Analyze captions for keywords, timeline, or phrases
+- `get_active_live_chat_id`: Get the live chat ID for a livestream
+- `get_live_chat_messages`: Get messages from a live chat
+- `send_live_chat_message`: Send a message to a live chat
+- `upload_video`: Upload a video to YouTube
 
 ## Available Resources
 
-### `youtube://status`
+- `youtube://status`: Check if the YouTube API is configured correctly
+- `youtube://trending`: Get current trending videos
+- `youtube://categories`: Get list of YouTube video categories
+- `youtube://recommendations/{video_id}`: Get video recommendations
 
-Checks if the YouTube API is configured correctly.
+## Project Structure
 
-### `youtube://trending`
+- `main.py`: Entry point for the MCP server
+- `constants.py`: Constant values used throughout the application
+- `utils.py`: Utility functions
+- `api_client.py`: YouTube API client for making HTTP requests
+- `tools/`: Individual tool implementations
+  - `channel_info.py`: Channel information tools
+  - `search_videos.py`: Video search tools
+  - `video_details.py`: Video details tools
+  - `channel_videos.py`: Channel video listing tools
+  - `playlist_details.py`: Playlist tools
+  - `video_comments.py`: Video comment tools
+  - `thumbnail_analysis.py`: Thumbnail analysis tools
+  - `topic_search.py`: Topic search tools
+  - `channel_subscriptions.py`: Channel subscription tools
+  - `video_performance.py`: Video performance analysis
+  - `live_broadcast.py`: Live broadcast creation
+  - `captions.py`: Caption/subtitle tools
+  - `live_chat.py`: Live chat interaction tools
+  - `resources.py`: Resource endpoints
 
-Gets the current trending videos on YouTube.
+## Getting a YouTube API Key
 
-### `youtube://categories`
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project
+3. Enable the YouTube Data API v3
+4. Create credentials for the API
+5. Copy the API key to your `.env` file
 
-Gets a list of YouTube video categories.
+## Setting up OAuth for Extended Functionality
 
-### `youtube://recommendations/{video_id}`
+Some functions require OAuth authentication:
 
-Gets YouTube video recommendations based on a video ID or trending videos.
+1. Create OAuth 2.0 credentials in the Google Cloud Console
+2. Set up a consent screen for your application
+3. Generate an OAuth token (you may need to implement a flow in a separate script)
+4. Add the token to your `.env` file
 
-Parameters:
-- `video_id`: Optional ID of a video to get recommendations for
+## API Rate Limits
 
-## Extending the Server
+The YouTube Data API has quota limits:
 
-This server can be extended with additional tools and resources by following the MCP server pattern. To add new functionality:
+- Each project starts with 10,000 units per day
+- Different API operations cost different amounts of quota
+- Monitor your usage in the Google Cloud Console
 
-1. Add a new tool or resource method in `youtube_api.py`
-2. Use the `@mcp.tool()` or `@mcp.resource()` decorators
-3. Restart the server to apply changes
+## YouTube Handle Resolution
+
+The server supports using YouTube handles (e.g., @username) in place of channel IDs:
+
+- Tools that require channel IDs can accept handles with or without the '@' symbol
+- The system automatically resolves handles to channel IDs
+- A dedicated `lookup_channel` tool is available to get channel information from a handle
+- Handles are resolved using the YouTube API's channel lookup capabilities
+
+## Error Handling
+
+The server implements robust error handling:
+
+- API errors are properly caught and formatted
+- Useful error messages are provided
+- Timeouts and retries are implemented for network issues
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## Troubleshooting
 
-- If you receive authentication errors, make sure your API key is set correctly
-- For OAuth-required functions, ensure your OAuth credentials are valid and have the necessary scopes
-- Check the server logs for detailed error information
-- Ensure your API key has the necessary permissions for the YouTube Data API v3
+Common issues:
+
+- **API Key Invalid**: Ensure your API key is correct and has the YouTube Data API enabled
+- **Quota Exceeded**: You've hit your daily API quota limit
+- **Authentication Required**: Some functions need OAuth tokens
+- **Resource Not Found**: The video, channel, or playlist ID may be incorrect
 
 ## License
 
-N/A (Private)
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Google for the YouTube Data API
+- The MCP framework for the server architecture
+- Contributors and maintainers of this project
