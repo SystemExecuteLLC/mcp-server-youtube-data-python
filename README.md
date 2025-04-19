@@ -20,7 +20,7 @@ mcp dev youtube_api.py
 ## Setup - Note TBC - use pipx, seems to play nicely with uv
 source .venv/bin/activate ## activates the environment that is stored in the local .venv folder
 
-uv run pip install -r requiremnts.txt
+uv pip install -r requirements.txt
 uv run python youtube_api.py
 
 ### Prerequisites
